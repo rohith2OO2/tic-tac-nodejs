@@ -37,6 +37,6 @@ jobs:
     - name: Update ECS Service
       run: |
         aws ecs update-service \
-          --cluster my-fargate-cluster \
+          --cluster my-fargate-cluste1 \
           --service my-service \
           --force-new-deployment
