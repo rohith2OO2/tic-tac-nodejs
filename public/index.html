@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe Game</title>
+    <style>
+        :root {
+            --color-background: #1a1a2e;
+            --color-surface: #16213e;
+            --color-primary: #0f3460;
+            --color-accent: #e94560;
+            --color-text: #eaeaea;
+            --color-x: #00d4ff;
+            --color-o: #ff6b9d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--color-background) 0%, var(--color-primary) 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            color: var(--color-text);
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            color: var(--color-accent);
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+
+        .game-info {
+            background: var(--color-surface);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+        }
+
+        .current-player {
+            font-size: 1.5em;
+            color: var(--color-text);
+            margin-bottom: 15px;
+        }
+
+        .player-indicator {
+            display: inline-block;
+            font-weight: bold;
+            padding: 5px 15px;
+            border-radius: 8px;
+            margin-left: 10px;
+        }
+
+        .player-x {
+            color: var(--color-x);
+            background: rgba(0, 212, 255, 0.2);
+        }
+
+        .player-o {
+            color: var(--color-o);
+            background: rgba(255, 107, 157, 0.2);
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .score-item {
+            flex: 1;
+            padding: 10px;
+            background: var(--color-primary);
+            border-radius: 10px;
+        }
+
+        .score-label {
+            font-size: 0.9em;
+            color: var(--color-text);
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .score-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: var(--color-accent);
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+            background: var(--color-surface);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+        }
+
+        .cell {
+            aspect-ratio: 1;
+            background: var(--color-primary);
+            border: none;
+            border-radius: 12px;
+            font-size: 3em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--color-text);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .cell:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            background: var(--color-accent);
+        }
+
+        .cell:disabled {
+            cursor: not-allowed;
+            opacity: 0.9;
+        }
+
+        .cell.x {
+            color: var(--color-x);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .cell.o {
+            color: var(--color-o);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .cell.winning {
+            animation: pulse 0.6s ease-in-out;
+            background: var(--color-accent);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary {
+            background: var(--color-accent);
+            color: var(--color-text);
+        }
+
+        .btn-primary:hover {
+            background: #d63851;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+
+        .btn-secondary {
+            background: var(--color-primary);
+            color: var(--color-text);
+        }
+
+        .btn-secondary:hover {
+            background: #0a2647;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+
+        .game-status {
+            margin-top: 20px;
+            padding: 15px;
+            background: var(--color-surface);
+            border-radius: 10px;
+            color: var(--color-text);
+            font-size: 1.2em;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .winner-announcement {
+            animation: bounceIn 0.6s ease;
+            font-weight: bold;
+            color: var(--color-accent);
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2em;
+            }
+            
+            .cell {
+                font-size: 2em;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Tic-Tac-Toe</h1>
+        <p class="subtitle">Challenge your friend!</p>
+
+        <div class="game-info">
+            <div class="current-player">
+                Current Turn: 
+                <span class="player-indicator" id="currentPlayerDisplay">X</span>
+            </div>
+            <div class="score-board">
+                <div class="score-item">
+                    <div class="score-label">Player X</div>
+                    <div class="score-value" id="scoreX">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">Draws</div>
+                    <div class="score-value" id="scoreDraw">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label">Player O</div>
+                    <div class="score-value" id="scoreO">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="board" id="board">
+            <button class="cell" data-index="0"></button>
+            <button class="cell" data-index="1"></button>
+            <button class="cell" data-index="2"></button>
+            <button class="cell" data-index="3"></button>
+            <button class="cell" data-index="4"></button>
+            <button class="cell" data-index="5"></button>
+            <button class="cell" data-index="6"></button>
+            <button class="cell" data-index="7"></button>
+            <button class="cell" data-index="8"></button>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" id="resetBtn">New Game</button>
+            <button class="btn btn-secondary" id="resetScoreBtn">Reset Score</button>
+        </div>
+
+        <div class="game-status" id="gameStatus">
+            Player X starts!
+        </div>
+    </div>
+
+    <script>
+        class TicTacToe {
+            constructor() {
+                this.board = ['', '', '', '', '', '', '', '', ''];
+                this.currentPlayer = 'X';
+                this.gameActive = true;
+                this.scores = {
+                    X: 0,
+                    O: 0,
+                    draw: 0
+                };
+                this.winningConditions = [
+                    [0, 1, 2],
+                    [3, 4, 5],
+                    [6, 7, 8],
+                    [0, 3, 6],
+                    [1, 4, 7],
+                    [2, 5, 8],
+                    [0, 4, 8],
+                    [2, 4, 6]
+                ];
+                this.init();
+                this.loadScores();
+            }
+
+            init() {
+                this.cells = document.querySelectorAll('.cell');
+                this.gameStatus = document.getElementById('gameStatus');
+                this.resetBtn = document.getElementById('resetBtn');
+                this.resetScoreBtn = document.getElementById('resetScoreBtn');
+                this.currentPlayerDisplay = document.getElementById('currentPlayerDisplay');
+
+                this.cells.forEach(cell => {
+                    cell.addEventListener('click', (e) => this.handleCellClick(e));
+                });
+
+                this.resetBtn.addEventListener('click', () => this.resetGame());
+                this.resetScoreBtn.addEventListener('click', () => this.resetScores());
+
+                this.updateDisplay();
+            }
+
+            handleCellClick(e) {
+                const cell = e.target;
+                const index = parseInt(cell.getAttribute('data-index'));
+
+                if (this.board[index] !== '' || !this.gameActive) {
+                    return;
+                }
+
+                this.board[index] = this.currentPlayer;
+                cell.textContent = this.currentPlayer;
+                cell.classList.add(this.currentPlayer.toLowerCase());
+                cell.disabled = true;
+
+                if (this.checkWin()) {
+                    this.handleWin();
+                } else if (this.checkDraw()) {
+                    this.handleDraw();
+                } else {
+                    this.switchPlayer();
+                }
+            }
+
+            checkWin() {
+                for (let condition of this.winningConditions) {
+                    const [a, b, c] = condition;
+                    if (this.board[a] && 
+                        this.board[a] === this.board[b] && 
+                        this.board[a] === this.board[c]) {
+                        this.winningCombination = condition;
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            checkDraw() {
+                return this.board.every(cell => cell !== '');
+            }
+
+            handleWin() {
+                this.gameActive = false;
+                this.scores[this.currentPlayer]++;
+                this.saveScores();
+                this.updateScoreDisplay();
+                
+                this.winningCombination.forEach(index => {
+                    this.cells[index].classList.add('winning');
+                });
+
+                this.gameStatus.innerHTML = `<span class="winner-announcement">🎉 Player ${this.currentPlayer} Wins!</span>`;
+            }
+
+            handleDraw() {
+                this.gameActive = false;
+                this.scores.draw++;
+                this.saveScores();
+                this.updateScoreDisplay();
+                this.gameStatus.innerHTML = `<span class="winner-announcement">🤝 It's a Draw!</span>`;
+            }
+
+            switchPlayer() {
+                this.currentPlayer = this.currentPlayer === 'X' ? 'O' : 'X';
+                this.updateDisplay();
+            }
+
+            updateDisplay() {
+                this.currentPlayerDisplay.textContent = this.currentPlayer;
+                this.currentPlayerDisplay.className = `player-indicator player-${this.currentPlayer.toLowerCase()}`;
+                
+                if (this.gameActive) {
+                    this.gameStatus.textContent = `Player ${this.currentPlayer}'s turn`;
+                }
+            }
+
+            updateScoreDisplay() {
+                document.getElementById('scoreX').textContent = this.scores.X;
+                document.getElementById('scoreO').textContent = this.scores.O;
+                document.getElementById('scoreDraw').textContent = this.scores.draw;
+            }
+
+            resetGame() {
+                this.board = ['', '', '', '', '', '', '', '', ''];
+                this.currentPlayer = 'X';
+                this.gameActive = true;
+                this.winningCombination = null;
+
+                this.cells.forEach(cell => {
+                    cell.textContent = '';
+                    cell.disabled = false;
+                    cell.classList.remove('x', 'o', 'winning');
+                });
+
+                this.updateDisplay();
+                this.gameStatus.textContent = `Player ${this.currentPlayer} starts!`;
+            }
+
+            resetScores() {
+                this.scores = { X: 0, O: 0, draw: 0 };
+                this.saveScores();
+                this.updateScoreDisplay();
+                this.resetGame();
+            }
+
+            saveScores() {
+                try {
+                    // Use in-memory storage since localStorage is not available
+                    this.persistedScores = { ...this.scores };
+                } catch (e) {
+                    console.log('Score persistence not available');
+                }
+            }
+
+            loadScores() {
+                try {
+                    if (this.persistedScores) {
+                        this.scores = { ...this.persistedScores };
+                        this.updateScoreDisplay();
+                    }
+                } catch (e) {
+                    console.log('Could not load scores');
+                }
+            }
+        }
+
+        // Initialize game when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            const game = new TicTacToe();
+        });
+    </script>
+</body>
+</html>
+
