@@ -9,43 +9,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout repository
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      # 2️⃣ Configure AWS credentials
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-south-1
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-south-1
 
-      # 3️⃣ Log in to private ECR
-      - name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@v2
-        with:
-          registry: ${{ secrets.ECR_REPO }}
+    - name: Login to Amazon ECR
+      uses: aws-actions/amazon-ecr-login@v2
 
-      # 4️⃣ Build Docker image
-      - name: Build Docker image
-        run: |
-          docker build -t titacapp .
+    - name: Build Docker image
+      run: |
+        docker build -t my-sample-app .
 
-      # 5️⃣ Tag Docker image for ECR
-      - name: Tag Docker image
-        run: |
-          docker tag titacapp:latest ${{ secrets.ECR_REPO }}:latest
+    - name: Tag image
+      run: |
+        docker tag my-sample-app:latest ${{ secrets.ECR_REPO }}:latest
 
-      # 6️⃣ Push Docker image to ECR
-      - name: Push Docker image to ECR
-        run: |
-          docker push ${{ secrets.ECR_REPO }}:latest
+    - name: Push image to ECR
+      run: |
+        docker push ${{ secrets.ECR_REPO }}:latest
 
-      # 7️⃣ Deploy to ECS Fargate
-      - name: Deploy to ECS
-        run: |
-          aws ecs update-service \
-            --cluster tic-tac \
-            --service taskDefinition-service-wzy1q5bj \
-            --force-new-deployment
+    - name: Update ECS Service
+      run: |
+        aws ecs update-service \
+          --cluster  tic-tac \
+          --service taskDefinition-service-wzy1q5bj \
+          --force-new-deployment
