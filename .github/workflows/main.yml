@@ -37,6 +37,6 @@ jobs:
     - name: Deploy to ECS
       run: |
         aws ecs update-service \
-          --cluster my-fargate-cluste1 \
-          --service titacapp-service-kekk0oby \
+          --cluster tic-tac \
+          --service taskDefinition-service-wzy1q5bj \
           --force-new-deployment
